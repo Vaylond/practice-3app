@@ -1,0 +1,3 @@
+ADD SHIFT Тест Владимир 4
+REM длина > 0
+PRINT
