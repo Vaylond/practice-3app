@@ -1,33 +1,40 @@
+# Рефакторинг проекта и улучшение структуры кода
+"""
+Программа для работы с контейнером зашифрованных текстов.
+Поддерживаются шифры замены и сдвига.
+"""
+
 from abc import ABC, abstractmethod
 import sys
 import subprocess
 
 
 if len(sys.argv) < 2 or sys.argv[1] != "external_window":
-    # Вызываем новое окно cmd
     subprocess.Popen(
-        ['start', 'cmd', '/k',
-         sys.executable,
-         sys.argv[0],
-         'external_window'],
+        ['start', 'cmd', '/k', sys.executable, sys.argv[0], 'external_window'],
         shell=True
     )
-    sys.exit() # Закрываем фоновый процесс в VS Code
+    sys.exit()
 
 
 class EncryptedText(ABC):
+    """Базовый класс для шифрованных текстов."""
+
     def __init__(self, text, owner_name):
         self._text = text
         self._owner_name = owner_name
 
     def get_text(self):
+        """Возвращает исходный текст."""
         return self._text
 
     def get_owner_name(self):
+        """Возвращает имя владельца."""
         return self._owner_name
 
     @abstractmethod
     def encrypt(self):
+        """Абстрактный метод шифрования текста."""
         pass
 
     def __str__(self):
@@ -39,51 +46,61 @@ class EncryptedText(ABC):
 
 
 class SubstitutionCipher(EncryptedText):
+    """Шифр замены с использованием алфавитов."""
+
     def __init__(self, text, owner_name, source_alphabet, replacement_alphabet):
         super().__init__(text, owner_name)
         self._source_alphabet = source_alphabet.lower()
         self._replacement_alphabet = replacement_alphabet.lower()
 
     def encrypt(self):
-        res = ""
+        """Шифрует текст методом замены символов."""
+        result = ""
         for char in self._text:
             char_lower = char.lower()
             if char_lower in self._source_alphabet:
-                idx = self._source_alphabet.index(char_lower)
-                new_char = self._replacement_alphabet[idx]
-                res += new_char.upper() if char.isupper() else new_char
+                index = self._source_alphabet.index(char_lower)
+                new_char = self._replacement_alphabet[index]
+                result += new_char.upper() if char.isupper() else new_char
             else:
-                res += char
-        return res
+                result += char
+        return result
 
     def __str__(self):
         return f"[Шифр Замены] {super().__str__()}"
 
 
 class ShiftCipher(EncryptedText):
+    """Шифр сдвига символов."""
+
     def __init__(self, text, owner_name, shift_step):
         super().__init__(text, owner_name)
         self._shift_step = shift_step
 
     def encrypt(self):
-        res = ""
+        """Шифрует текст методом сдвига символов."""
+        result = ""
         for char in self._text:
-            res += chr(ord(char) + self._shift_step)
-        return res
+            result += chr(ord(char) + self._shift_step)
+        return result
 
     def __str__(self):
         return f"[Шифр Сдвига] {super().__str__()}"
 
 
-class TextContainer(object):
+class TextContainer:
+    """Контейнер для хранения объектов зашифрованного текста."""
+
     def __init__(self):
         self._items = []
 
     def add_object(self, item):
+        """Добавляет объект в контейнер."""
         self._items.append(item)
         print(f"-> Добавлен объект для владельца {item.get_owner_name()}")
 
     def remove_by_condition(self, condition):
+        """Удаляет объекты по заданному условию."""
         parts = condition.split()
         if len(parts) < 3:
             return
@@ -113,19 +130,23 @@ class TextContainer(object):
         print(f"-> Удалено объектов по условию '{condition}': {removed_count}")
 
     def print_all(self):
+        """Выводит содержимое контейнера."""
         print("\n===== СОДЕРЖИМОЕ КОНТЕЙНЕРА =====")
         if not self._items:
             print("[Контейнер пуст]")
-        for idx, item in enumerate(self._items, 1):
-            print(f"{idx}. {item}")
+        for index, item in enumerate(self._items, 1):
+            print(f"{index}. {item}")
         print("==================================\n")
 
 
 class CommandProcessor:
+    """Обработчик команд для работы с контейнером."""
+
     def __init__(self, container):
         self._container = container
 
     def process_file(self, filename):
+        """Обрабатывает команды из файла."""
         print(f"Начало обработки файла: {filename}")
         try:
             with open(filename, "r", encoding="utf-8") as file:
@@ -137,6 +158,7 @@ class CommandProcessor:
             print(f"Ошибка: Файл {filename} не найден!")
 
     def process_command(self, command):
+        """Обрабатывает отдельную команду."""
         parts = command.split()
         if not parts:
             return
@@ -177,7 +199,7 @@ class CommandProcessor:
                     obj = ShiftCipher(text, owner, shift_step)
                     self._container.add_object(obj)
                 except ValueError:
-                    print(f"Ошибка: Шаг сдвига должен быть целым числом!")
+                    print("Ошибка: Шаг сдвига должен быть целым числом!")
             else:
                 print(f"Ошибка: Неизвестный тип шифра '{cipher_type}'")
         else:
