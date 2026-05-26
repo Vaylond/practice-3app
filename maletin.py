@@ -5,7 +5,13 @@ import subprocess
 
 if len(sys.argv) < 2 or sys.argv[1] != "external_window":
     # Вызываем новое окно cmd
-    subprocess.Popen(['start', 'cmd', '/k', sys.executable, sys.argv[0], 'external_window'], shell=True)
+    subprocess.Popen(
+        ['start', 'cmd', '/k',
+         sys.executable,
+         sys.argv[0],
+         'external_window'],
+        shell=True
+    )
     sys.exit() # Закрываем фоновый процесс в VS Code
 
 
@@ -25,7 +31,11 @@ class EncryptedText(ABC):
         pass
 
     def __str__(self):
-        return f"Владелец: {self._owner_name} | Оригинал: '{self._text}' | Зашифровано: '{self.encrypt()}'"
+        return (
+            f"Владелец: {self._owner_name} | "
+            f"Оригинал: '{self._text}' | "
+            f"Зашифровано: '{self.encrypt()}'"
+        )
 
 
 class SubstitutionCipher(EncryptedText):
@@ -77,7 +87,7 @@ class TextContainer(object):
         parts = condition.split()
         if len(parts) < 3:
             return
-            
+
         field = parts[0].lower()
         operator = parts[1]
         value = parts[2].lower()
@@ -94,10 +104,10 @@ class TextContainer(object):
                     keep = False
                 elif operator == ">" and len(item.get_text()) > length:
                     keep = False
-                    
+
             if keep:
                 new_items.append(item)
-                
+
         removed_count = len(self._items) - len(new_items)
         self._items = new_items
         print(f"-> Удалено объектов по условию '{condition}': {removed_count}")
@@ -130,7 +140,7 @@ class CommandProcessor:
         parts = command.split()
         if not parts:
             return
-            
+
         cmd_type = parts[0].upper()
 
         if cmd_type == "PRINT":
@@ -178,7 +188,6 @@ if __name__ == "__main__":
     container = TextContainer()
     processor = CommandProcessor(container)
     processor.process_file("commands.txt")
-    
-    
+
     print("\nНажмите Enter для выхода из программы...")
     input()

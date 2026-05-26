@@ -1,3 +1,9 @@
-ADD SHIFT Тест Владимир 4
-REM длина > 0
+ADD SUB abc Владимир abc xyz
+ADD SHIFT Hello Владимир 3
+ADD SHIFT Секрет Анна 1
+ADD SUB topsecret Алексей abcdefghijklmnopqrstuvwxyz zyxwvutsrqponmlkjihgfedcba
+PRINT
+REM владелец = Владимир
+PRINT
+REM длина < 9
 PRINT
