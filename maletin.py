@@ -9,14 +9,6 @@ import sys
 import subprocess
 
 
-if len(sys.argv) < 2 or sys.argv[1] != "external_window":
-    subprocess.Popen(
-        ['start', 'cmd', '/k', sys.executable, sys.argv[0], 'external_window'],
-        shell=True
-    )
-    sys.exit()
-
-
 class EncryptedText(ABC):
     """Базовый класс для шифрованных текстов."""
 
@@ -207,6 +199,15 @@ class CommandProcessor:
 
 
 if __name__ == "__main__":
+    # Блок создания внешнего консольного окна перенесен сюда,
+    # чтобы не мешать импорту во время автоматического тестирования
+    if len(sys.argv) < 2 or sys.argv[1] != "external_window":
+        subprocess.Popen(
+            ['start', 'cmd', '/k', sys.executable, sys.argv[0], 'external_window'],
+            shell=True
+        )
+        sys.exit()
+
     container = TextContainer()
     processor = CommandProcessor(container)
     processor.process_file("commands.txt")
